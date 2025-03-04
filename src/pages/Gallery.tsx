@@ -44,21 +44,35 @@ export default function Gallery() {
       const { data: publicDrawings, error: publicError } = await supabase
         .from('saved_drawings')
         .select(`
-          id, title, image_data, created_at, user_id, is_public,
-          profiles(username)
+          id, title, image_data, created_at, user_id, is_public
         `)
         .eq('is_public', true)
         .order('created_at', { ascending: false });
       
       if (publicError) throw publicError;
       
-      // Format data to include username
-      const formattedPublicDrawings = publicDrawings.map(drawing => ({
-        ...drawing,
-        username: drawing.profiles?.username
-      }));
-      
-      setAllDrawings(formattedPublicDrawings);
+      // If we have public drawings, fetch the usernames for each drawing
+      if (publicDrawings && publicDrawings.length > 0) {
+        const formattedPublicDrawings = await Promise.all(
+          publicDrawings.map(async (drawing) => {
+            // Fetch username for each drawing
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('username')
+              .eq('id', drawing.user_id)
+              .single();
+            
+            return {
+              ...drawing,
+              username: profileData?.username || 'Unknown artist'
+            };
+          })
+        );
+        
+        setAllDrawings(formattedPublicDrawings);
+      } else {
+        setAllDrawings([]);
+      }
       
       // If user is logged in, fetch their drawings
       if (user) {
