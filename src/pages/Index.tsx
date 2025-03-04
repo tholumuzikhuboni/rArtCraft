@@ -3,7 +3,7 @@ import { Canvas } from '@/components/Canvas';
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Github, Heart, Palette, Reddit, Twitter } from 'lucide-react';
+import { Github, Heart, Palette, MessageSquare, Twitter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Index = () => {
@@ -115,7 +115,7 @@ const Index = () => {
                 className="w-8 h-8 rounded-full bg-artcraft-muted flex items-center justify-center text-artcraft-primary hover:bg-artcraft-accent hover:text-white transition-colors"
                 aria-label="Reddit"
               >
-                <Reddit className="h-4 w-4" />
+                <MessageSquare className="h-4 w-4" />
               </a>
               <a 
                 href="#" 
