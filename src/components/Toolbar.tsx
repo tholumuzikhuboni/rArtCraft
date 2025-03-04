@@ -1,4 +1,3 @@
-
 import { Paintbrush, Eraser, Save, Trash, FileUp, FileDown, Undo, Redo } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ColorPicker } from './ColorPicker';
@@ -71,7 +70,6 @@ export const Toolbar = ({
             onChange={(e) => onBrushSizeChange(parseInt(e.target.value))}
             className="w-20 rotate-90 absolute -left-8 h-0 cursor-pointer"
             style={{ 
-              appearance: 'slider-vertical', 
               transform: 'rotate(90deg) translateX(-100%)', 
               transformOrigin: 'left'
             }}

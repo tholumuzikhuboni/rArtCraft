@@ -2,6 +2,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { Toolbar } from './Toolbar';
+import { Download } from 'lucide-react'; // Add this import
 import { DrawingSettings, clearCanvas, drawLine, getPointerPosition, loadCanvasFromLocalStorage, saveCanvasToLocalStorage } from '@/utils/canvasUtils';
 
 interface CanvasProps {
