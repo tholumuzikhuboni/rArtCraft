@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Loader2, Mail, Lock, User as UserIcon } from "lucide-react";
+import { Loader2, Mail, Lock, User as UserIcon, Heart } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 
@@ -23,10 +23,10 @@ export default function Auth() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-artcraft-muted/20">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-artcraft-muted/20">
       <Header onToggleSidebar={toggleSidebar} />
       
-      <div className="container max-w-md mx-auto pt-32 pb-16">
+      <div className="flex-grow container max-w-md mx-auto pt-32 pb-16">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-3">
             Welcome to <span className="bg-clip-text text-transparent bg-gradient-to-r from-artcraft-accent to-orange-400">r/ArtCraft</span>
@@ -40,6 +40,14 @@ export default function Auth() {
           <AuthTabs />
         </div>
       </div>
+      
+      <footer className="border-t border-artcraft-muted/50 py-6 bg-white/50">
+        <div className="container text-center">
+          <p className="text-sm text-artcraft-secondary">
+            &copy; {new Date().getFullYear()} r/ArtCraft — Made with <Heart className="h-3 w-3 inline text-red-500" /> for Reddit Hackathon
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

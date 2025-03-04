@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import Gallery from "./pages/Gallery";
 import Communities from "./pages/Communities";
 import Challenges from "./pages/Challenges";
+import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,11 @@ const App = () => (
             <Route path="/challenges" element={
               <AuthCheck>
                 <Challenges />
+              </AuthCheck>
+            } />
+            <Route path="/leaderboard" element={
+              <AuthCheck>
+                <Leaderboard />
               </AuthCheck>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

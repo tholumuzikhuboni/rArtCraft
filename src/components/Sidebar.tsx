@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, Palette, Users, Trophy, Star, LayoutGrid, User, Image } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Palette, Users, Trophy, LayoutGrid, User, Image } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useLocation } from 'react-router-dom';
@@ -127,13 +127,16 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
             <span>Challenges</span>
           </Link>
           
-          <a 
-            href="#" 
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-artcraft-muted text-artcraft-primary transition-colors"
+          <Link 
+            to="/leaderboard" 
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-md hover:bg-artcraft-muted text-artcraft-primary transition-colors",
+              isActive('/leaderboard') && "bg-artcraft-muted/70 font-medium"
+            )}
           >
-            <Star className="h-5 w-5 text-artcraft-accent" />
-            <span>Featured</span>
-          </a>
+            <LayoutGrid className="h-5 w-5 text-artcraft-accent" />
+            <span>Leaderboard</span>
+          </Link>
           
           {user && (
             <Link 
