@@ -1,7 +1,9 @@
 
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Download, Info, Menu } from 'lucide-react';
+import { Download, Info, Menu, LogIn, UserCircle, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   onExport?: () => void;
@@ -11,6 +13,8 @@ interface HeaderProps {
 export const Header = ({ onExport, onToggleSidebar }: HeaderProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { user, signOut } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -20,6 +24,10 @@ export const Header = ({ onExport, onToggleSidebar }: HeaderProps) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  
+  const handleUserMenuToggle = () => {
+    setShowUserMenu(!showUserMenu);
+  };
   
   return (
     <header className={cn(
@@ -39,9 +47,9 @@ export const Header = ({ onExport, onToggleSidebar }: HeaderProps) => {
               <Menu className="h-5 w-5" />
             </button>
           )}
-          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-artcraft-accent to-orange-300">
+          <Link to="/" className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-artcraft-accent to-orange-300">
             r/ArtCraft
-          </h1>
+          </Link>
           <div className="h-6 w-px bg-artcraft-muted mx-4"></div>
           <p className="text-sm text-artcraft-secondary hidden sm:block">
             Collaborative Canvas
@@ -57,6 +65,44 @@ export const Header = ({ onExport, onToggleSidebar }: HeaderProps) => {
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Export</span>
             </button>
+          )}
+          
+          {!user ? (
+            <Link
+              to="/auth"
+              className="px-3 py-1.5 rounded-lg flex items-center gap-1.5 bg-artcraft-accent hover:bg-artcraft-accent/90 text-white text-sm transition-colors hover:shadow-sm"
+            >
+              <LogIn className="h-4 w-4" />
+              <span className="hidden sm:inline">Sign In</span>
+            </Link>
+          ) : (
+            <div className="relative">
+              <button
+                onClick={handleUserMenuToggle}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-artcraft-primary hover:bg-artcraft-muted transition-colors"
+                title="User menu"
+              >
+                <UserCircle className="h-5 w-5" />
+              </button>
+              
+              {showUserMenu && (
+                <div className="absolute top-full right-0 mt-1 glass rounded-lg p-2 w-48 animate-scale-in z-30 shadow-lg">
+                  <div className="px-3 py-2 border-b border-artcraft-muted/30">
+                    <p className="font-medium text-artcraft-primary text-sm">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      signOut();
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full px-3 py-2 text-left flex items-center gap-2 text-sm text-artcraft-secondary hover:bg-artcraft-muted/50 rounded-md transition-colors mt-1"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           )}
           
           <button

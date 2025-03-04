@@ -1,9 +1,22 @@
-
 import { useRef, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { Toolbar } from './Toolbar';
-import { Download } from 'lucide-react'; // Add this import
-import { DrawingSettings, clearCanvas, drawLine, getPointerPosition, loadCanvasFromLocalStorage, saveCanvasToLocalStorage } from '@/utils/canvasUtils';
+import { Download, Save } from 'lucide-react';
+import { 
+  DrawingSettings, 
+  clearCanvas, 
+  drawLine, 
+  getPointerPosition, 
+  loadCanvasFromLocalStorage, 
+  saveCanvasToLocalStorage 
+} from '@/utils/canvasUtils';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 interface CanvasProps {
   width?: number;
@@ -23,7 +36,12 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   
-  // Initialize canvas
+  const { user } = useAuth();
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [drawingTitle, setDrawingTitle] = useState('');
+  const [isPublic, setIsPublic] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -31,14 +49,11 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Set initial background to white
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Try to load from localStorage
     const loaded = loadCanvasFromLocalStorage(canvas);
     
-    // Save initial state to history
     saveToHistory();
     
     if (loaded) {
@@ -46,15 +61,12 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
     }
   }, []);
   
-  // Save current state to history
   const saveToHistory = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
     const dataURL = canvas.toDataURL();
     
-    // If we're in the middle of the history and make a new change,
-    // discard all future history
     if (historyIndex !== history.length - 1 && historyIndex !== -1) {
       setHistory((prev) => [...prev.slice(0, historyIndex + 1), dataURL]);
     } else {
@@ -64,7 +76,6 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
     setHistoryIndex((prev) => prev + 1);
   };
   
-  // Restore from history
   const restoreFromHistory = (index: number) => {
     if (index < 0 || index >= history.length) return;
     
@@ -84,13 +95,12 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
     setHistoryIndex(index);
   };
   
-  // Handle touch/mouse events
   const handlePointerDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
     if ('touches' in e) {
-      e.preventDefault(); // Prevent scrolling on touch
+      e.preventDefault();
     }
     
     setIsDrawing(true);
@@ -124,7 +134,6 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
     }
   };
   
-  // Handle clear
   const handleClear = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -134,16 +143,65 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
     toast("Canvas cleared");
   };
   
-  // Handle save
   const handleSave = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    saveCanvasToLocalStorage(canvas);
-    toast("Artwork saved locally");
+    if (user) {
+      setShowSaveDialog(true);
+      setDrawingTitle('');
+    } else {
+      saveCanvasToLocalStorage(canvas);
+      toast("Artwork saved locally");
+    }
   };
   
-  // Handle load
+  const handleSaveToSupabase = async () => {
+    if (!user) {
+      toast.error("You must be logged in to save drawings");
+      return;
+    }
+    
+    if (!drawingTitle.trim()) {
+      toast.error("Please enter a title for your drawing");
+      return;
+    }
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    setIsSaving(true);
+    
+    try {
+      const dataURL = canvas.toDataURL('image/png');
+      
+      const { data, error } = await supabase
+        .from('saved_drawings')
+        .insert([
+          {
+            user_id: user.id,
+            title: drawingTitle.trim(),
+            image_data: dataURL,
+            is_public: isPublic
+          }
+        ]);
+        
+      if (error) {
+        throw error;
+      }
+      
+      saveCanvasToLocalStorage(canvas);
+      
+      toast.success("Drawing saved successfully!");
+      setShowSaveDialog(false);
+    } catch (error) {
+      console.error("Error saving drawing:", error);
+      toast.error("Failed to save drawing");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
   const handleLoad = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -157,7 +215,6 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
     }
   };
   
-  // Handle export
   const handleExport = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -167,7 +224,6 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
     if (onExport) {
       onExport(dataURL);
     } else {
-      // Create a download link
       const link = document.createElement('a');
       link.download = 'artcraft-creation.png';
       link.href = dataURL;
@@ -176,7 +232,6 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
     }
   };
   
-  // Handle undo
   const handleUndo = () => {
     if (historyIndex > 0) {
       restoreFromHistory(historyIndex - 1);
@@ -184,7 +239,6 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
     }
   };
   
-  // Handle redo
   const handleRedo = () => {
     if (historyIndex < history.length - 1) {
       restoreFromHistory(historyIndex + 1);
@@ -236,6 +290,47 @@ export const Canvas = ({ width = 800, height = 600, onExport }: CanvasProps) => 
           <Download className="h-5 w-5" />
         </button>
       </div>
+      
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Save Your Drawing</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                placeholder="My Awesome Drawing"
+                value={drawingTitle}
+                onChange={(e) => setDrawingTitle(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is-public"
+                checked={isPublic}
+                onCheckedChange={setIsPublic}
+              />
+              <Label htmlFor="is-public">Make this drawing public</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowSaveDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveToSupabase}
+              disabled={isSaving || !drawingTitle.trim()}
+            >
+              {isSaving ? "Saving..." : "Save Drawing"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
