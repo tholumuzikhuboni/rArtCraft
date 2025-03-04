@@ -45,7 +45,7 @@ export default function Gallery() {
         .from('saved_drawings')
         .select(`
           id, title, image_data, created_at, user_id, is_public,
-          profiles:user_id (username)
+          profiles(username)
         `)
         .eq('is_public', true)
         .order('created_at', { ascending: false });

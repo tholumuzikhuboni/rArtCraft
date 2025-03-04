@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Download, Info, Menu, LogIn, UserCircle, LogOut, Image, Users, Trophy, User } from 'lucide-react';
@@ -6,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
   onExport?: () => void;
