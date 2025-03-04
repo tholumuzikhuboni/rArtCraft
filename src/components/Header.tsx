@@ -1,9 +1,11 @@
 
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Download, Info, Menu, LogIn, UserCircle, LogOut } from 'lucide-react';
+import { Download, Info, Menu, LogIn, UserCircle, LogOut, Image, Users, Trophy, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface HeaderProps {
   onExport?: () => void;
@@ -13,8 +15,7 @@ interface HeaderProps {
 export const Header = ({ onExport, onToggleSidebar }: HeaderProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -25,8 +26,13 @@ export const Header = ({ onExport, onToggleSidebar }: HeaderProps) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
-  const handleUserMenuToggle = () => {
-    setShowUserMenu(!showUserMenu);
+  const getAvatarUrl = () => {
+    if (!profile?.avatar_url) return undefined;
+    
+    return supabase.storage
+      .from('avatars')
+      .getPublicUrl(profile.avatar_url)
+      .data.publicUrl;
   };
   
   return (
@@ -50,10 +56,39 @@ export const Header = ({ onExport, onToggleSidebar }: HeaderProps) => {
           <Link to="/" className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-artcraft-accent to-orange-300">
             r/ArtCraft
           </Link>
-          <div className="h-6 w-px bg-artcraft-muted mx-4"></div>
-          <p className="text-sm text-artcraft-secondary hidden sm:block">
-            Collaborative Canvas
-          </p>
+          <div className="h-6 w-px bg-artcraft-muted mx-4 hidden md:block"></div>
+          
+          <nav className="hidden md:flex items-center space-x-1">
+            <Link 
+              to="/gallery" 
+              className="px-3 py-2 rounded-md text-sm text-artcraft-secondary hover:text-artcraft-primary hover:bg-artcraft-muted/50 transition-colors"
+            >
+              <span className="flex items-center gap-1.5">
+                <Image className="h-4 w-4" />
+                <span>Gallery</span>
+              </span>
+            </Link>
+            
+            <Link 
+              to="/communities" 
+              className="px-3 py-2 rounded-md text-sm text-artcraft-secondary hover:text-artcraft-primary hover:bg-artcraft-muted/50 transition-colors"
+            >
+              <span className="flex items-center gap-1.5">
+                <Users className="h-4 w-4" />
+                <span>Communities</span>
+              </span>
+            </Link>
+            
+            <Link 
+              to="/challenges" 
+              className="px-3 py-2 rounded-md text-sm text-artcraft-secondary hover:text-artcraft-primary hover:bg-artcraft-muted/50 transition-colors"
+            >
+              <span className="flex items-center gap-1.5">
+                <Trophy className="h-4 w-4" />
+                <span>Challenges</span>
+              </span>
+            </Link>
+          </nav>
         </div>
         
         <div className="flex items-center gap-2">
@@ -76,33 +111,52 @@ export const Header = ({ onExport, onToggleSidebar }: HeaderProps) => {
               <span className="hidden sm:inline">Sign In</span>
             </Link>
           ) : (
-            <div className="relative">
-              <button
-                onClick={handleUserMenuToggle}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-artcraft-primary hover:bg-artcraft-muted transition-colors"
-                title="User menu"
-              >
-                <UserCircle className="h-5 w-5" />
-              </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 hover:bg-artcraft-muted/50 rounded-full p-1 transition-colors">
+                  <Avatar className="h-8 w-8 border border-artcraft-muted">
+                    <AvatarImage src={getAvatarUrl()} />
+                    <AvatarFallback className="bg-artcraft-accent text-white text-xs">
+                      {profile?.username?.substring(0, 2).toUpperCase() || user.email?.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm text-artcraft-primary hidden sm:block">
+                    {profile?.username || user.email?.split('@')[0]}
+                  </span>
+                </button>
+              </DropdownMenuTrigger>
               
-              {showUserMenu && (
-                <div className="absolute top-full right-0 mt-1 glass rounded-lg p-2 w-48 animate-scale-in z-30 shadow-lg">
-                  <div className="px-3 py-2 border-b border-artcraft-muted/30">
-                    <p className="font-medium text-artcraft-primary text-sm">{user.email}</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      signOut();
-                      setShowUserMenu(false);
-                    }}
-                    className="w-full px-3 py-2 text-left flex items-center gap-2 text-sm text-artcraft-secondary hover:bg-artcraft-muted/50 rounded-md transition-colors mt-1"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>Sign Out</span>
-                  </button>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-3 py-2 border-b border-artcraft-muted/30">
+                  <p className="font-medium text-artcraft-primary text-sm">{user.email}</p>
+                  {profile?.username && <p className="text-xs text-artcraft-secondary">@{profile.username}</p>}
                 </div>
-              )}
-            </div>
+                
+                <Link to="/profile">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <User className="h-4 w-4 mr-2" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                </Link>
+                
+                <Link to="/gallery">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Image className="h-4 w-4 mr-2" />
+                    <span>My Gallery</span>
+                  </DropdownMenuItem>
+                </Link>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem 
+                  className="cursor-pointer text-red-500 focus:text-red-500"
+                  onClick={() => signOut()}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  <span>Sign Out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
           
           <button
@@ -132,4 +186,4 @@ export const Header = ({ onExport, onToggleSidebar }: HeaderProps) => {
       </div>
     </header>
   );
-};
+}
