@@ -9,6 +9,7 @@ import { AuthCheck } from "@/components/AuthCheck";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import UserProfile from "./pages/UserProfile";
 import Gallery from "./pages/Gallery";
 import Communities from "./pages/Communities";
 import Challenges from "./pages/Challenges";
@@ -32,6 +33,7 @@ const App = () => (
                 <Profile />
               </AuthCheck>
             } />
+            <Route path="/user/:userId" element={<UserProfile />} />
             <Route path="/gallery" element={
               <AuthCheck>
                 <Gallery />

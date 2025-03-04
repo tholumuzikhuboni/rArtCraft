@@ -1,10 +1,11 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
 import { Medal, Star, Trophy, Award } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 type LeaderboardUser = {
   username: string;
@@ -51,6 +52,7 @@ export const Leaderboard = () => {
         return;
       }
       
+      // Fetch only real users (those that have a profile)
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username, avatar_url')
@@ -62,14 +64,16 @@ export const Leaderboard = () => {
       }
       
       // Combine data and sort by drawing count
-      const leaderboardData = profilesData.map(profile => ({
-        id: profile.id,
-        username: profile.username || 'Anonymous Artist',
-        avatar_url: profile.avatar_url,
-        drawing_count: drawingCounts[profile.id] || 0,
-        rank: 0 // Will be set below
-      }))
-      .sort((a, b) => b.drawing_count - a.drawing_count);
+      const leaderboardData = profilesData
+        .filter(profile => profile.username) // Only include users with usernames
+        .map(profile => ({
+          id: profile.id,
+          username: profile.username || 'Anonymous Artist',
+          avatar_url: profile.avatar_url,
+          drawing_count: drawingCounts[profile.id] || 0,
+          rank: 0 // Will be set below
+        }))
+        .sort((a, b) => b.drawing_count - a.drawing_count);
       
       // Add rank
       leaderboardData.forEach((user, index) => {
@@ -137,29 +141,41 @@ export const Leaderboard = () => {
       <h3 className="font-medium text-artcraft-primary mb-3">Top Artists</h3>
       <div className="space-y-3">
         {users.slice(0, 5).map((user) => (
-          <div key={user.id} className="flex items-center gap-3">
+          <Link key={user.id} to={`/user/${user.id}`} className="flex items-center gap-3 group hover:bg-artcraft-muted/10 p-2 rounded-md transition-colors">
             <div className={cn(
               "flex items-center justify-center w-8 h-8 rounded-full",
               user.rank <= 3 ? "bg-gradient-to-br from-artcraft-accent/20 to-orange-200" : "bg-artcraft-muted/50"
             )}>
               {getBadgeIcon(user.rank)}
             </div>
-            <div className="flex-1">
-              <div className="flex items-center">
-                <span className="font-medium text-artcraft-primary">{user.username}</span>
-                {user.rank <= 3 && (
-                  <Award className={cn(
-                    "ml-1.5 h-4 w-4",
-                    user.rank === 1 ? "text-yellow-500" : 
-                    user.rank === 2 ? "text-gray-400" : "text-amber-600"
-                  )} />
-                )}
+            
+            <div className="flex-1 flex items-center">
+              <div className="mr-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={getAvatarUrl(user.avatar_url) || undefined} />
+                  <AvatarFallback className="bg-artcraft-accent/20 text-artcraft-primary">
+                    {user.username.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </div>
-              <p className="text-xs text-artcraft-secondary">
-                {user.drawing_count} {user.drawing_count === 1 ? 'artwork' : 'artworks'}
-              </p>
+              
+              <div>
+                <div className="flex items-center">
+                  <span className="font-medium text-artcraft-primary group-hover:text-artcraft-accent transition-colors">{user.username}</span>
+                  {user.rank <= 3 && (
+                    <Award className={cn(
+                      "ml-1.5 h-4 w-4",
+                      user.rank === 1 ? "text-yellow-500" : 
+                      user.rank === 2 ? "text-gray-400" : "text-amber-600"
+                    )} />
+                  )}
+                </div>
+                <p className="text-xs text-artcraft-secondary">
+                  {user.drawing_count} {user.drawing_count === 1 ? 'artwork' : 'artworks'}
+                </p>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

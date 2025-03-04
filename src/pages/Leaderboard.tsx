@@ -1,13 +1,22 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
 import { Leaderboard as LeaderboardComponent } from '@/components/Leaderboard';
-import { Trophy, Medal, Award } from 'lucide-react';
+import { Trophy, Medal, Award, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
+
+type Artist = {
+  id: string;
+  rank: number;
+  username: string;
+  artworks: number;
+  avatar_url: string | null;
+};
 
 const Leaderboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -106,28 +115,90 @@ const Leaderboard = () => {
           </div>
         </div>
       </main>
+      
+      <footer className="border-t border-artcraft-muted/50 py-6 bg-white/50">
+        <div className="container text-center">
+          <p className="text-sm text-artcraft-secondary">
+            &copy; {new Date().getFullYear()} r/ArtCraft — All rights reserved
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
 
 const TopArtists = () => {
-  const [artists, setArtists] = useState<any[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(true);
   
-  useState(() => {
+  useEffect(() => {
     const fetchArtists = async () => {
       try {
-        // This would be implemented with similar logic as in the Leaderboard component
-        // Fetching users and their drawing counts
-        setLoading(false);
+        setLoading(true);
+        
+        // First get all saved drawings with user_id
+        const { data: drawingsData, error: drawingsError } = await supabase
+          .from('saved_drawings')
+          .select('user_id');
+          
+        if (drawingsError) {
+          console.error('Error fetching drawings:', drawingsError);
+          return;
+        }
+        
+        // Count the drawings per user
+        const drawingCounts: Record<string, number> = {};
+        drawingsData.forEach(drawing => {
+          if (drawing.user_id) {
+            drawingCounts[drawing.user_id] = (drawingCounts[drawing.user_id] || 0) + 1;
+          }
+        });
+        
+        // Get all users who have created drawings
+        const userIds = Object.keys(drawingCounts);
+        if (userIds.length === 0) {
+          setLoading(false);
+          return;
+        }
+        
+        // Fetch only real users (those that have a profile)
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, username, avatar_url')
+          .in('id', userIds);
+          
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError);
+          return;
+        }
+        
+        // Combine data and sort by drawing count
+        const leaderboardData = profilesData
+          .filter(profile => profile.username) // Only include users with usernames
+          .map(profile => ({
+            id: profile.id,
+            username: profile.username || 'Anonymous Artist',
+            avatar_url: profile.avatar_url,
+            artworks: drawingCounts[profile.id] || 0,
+            rank: 0 // Will be set below
+          }))
+          .sort((a, b) => b.artworks - a.artworks);
+        
+        // Add rank
+        leaderboardData.forEach((user, index) => {
+          user.rank = index + 1;
+        });
+        
+        setArtists(leaderboardData);
       } catch (error) {
         console.error('Error fetching top artists:', error);
+      } finally {
         setLoading(false);
       }
     };
     
     fetchArtists();
-  });
+  }, []);
   
   const getAvatarUrl = (avatarUrl: string | null) => {
     if (!avatarUrl) return undefined;
@@ -139,18 +210,26 @@ const TopArtists = () => {
   };
   
   if (loading) {
-    return <div className="animate-pulse">Loading top artists...</div>;
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-artcraft-accent" />
+      </div>
+    );
   }
   
-  const sampleArtists = [
-    { rank: 1, name: "ArtMaster", artworks: 15, badge: "gold" },
-    { rank: 2, name: "CreativeGenius", artworks: 12, badge: "silver" },
-    { rank: 3, name: "ColorWizard", artworks: 10, badge: "bronze" },
-    { rank: 4, name: "PixelPro", artworks: 8 },
-    { rank: 5, name: "SketchKing", artworks: 7 },
-    { rank: 6, name: "DigitalDreamer", artworks: 6 },
-    { rank: 7, name: "CanvasCrafter", artworks: 5 },
-  ];
+  if (artists.length === 0) {
+    return (
+      <div className="text-center py-10">
+        <Trophy className="mx-auto h-12 w-12 text-artcraft-accent/20 mb-4" />
+        <h3 className="text-lg font-medium text-artcraft-primary mb-2">
+          No Artists Yet
+        </h3>
+        <p className="text-artcraft-secondary max-w-md mx-auto">
+          Be the first to create artwork and appear on the leaderboard!
+        </p>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-4">
@@ -160,8 +239,12 @@ const TopArtists = () => {
         <div className="text-right">Artworks</div>
       </div>
       
-      {sampleArtists.map((artist) => (
-        <div key={artist.rank} className="grid grid-cols-3 items-center py-2">
+      {artists.map((artist) => (
+        <Link 
+          key={artist.rank} 
+          to={`/user/${artist.id}`}
+          className="grid grid-cols-3 items-center py-2 hover:bg-artcraft-muted/10 rounded-md transition-colors"
+        >
           <div className="flex items-center">
             <div className={cn(
               "w-8 h-8 rounded-full flex items-center justify-center mr-2",
@@ -187,22 +270,23 @@ const TopArtists = () => {
           
           <div className="flex items-center">
             <Avatar className="h-8 w-8 mr-2">
+              <AvatarImage src={getAvatarUrl(artist.avatar_url) || undefined} />
               <AvatarFallback className={cn(
                 artist.rank === 1 ? "bg-yellow-200 text-yellow-800" : 
                 artist.rank === 2 ? "bg-gray-200 text-gray-800" : 
                 artist.rank === 3 ? "bg-amber-200 text-amber-800" : 
                 "bg-artcraft-muted/30 text-artcraft-primary"
               )}>
-                {artist.name.substring(0, 2)}
+                {artist.username.substring(0, 2)}
               </AvatarFallback>
             </Avatar>
-            <span className="font-medium text-artcraft-primary truncate">{artist.name}</span>
+            <span className="font-medium text-artcraft-primary truncate">{artist.username}</span>
           </div>
           
           <div className="text-right font-medium">
             {artist.artworks}
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );
