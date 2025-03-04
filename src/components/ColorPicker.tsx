@@ -43,8 +43,9 @@ export const ColorPicker = ({ onChange, color }: ColorPickerProps) => {
     <div className="relative" ref={containerRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="tool-button overflow-hidden relative border"
+        className="tool-button overflow-hidden relative border hover:scale-105 transition-transform"
         aria-label="Color picker"
+        title="Color picker"
       >
         <div 
           className="absolute inset-1 rounded-sm transition-transform duration-300"
@@ -65,7 +66,7 @@ export const ColorPicker = ({ onChange, color }: ColorPickerProps) => {
                   setIsOpen(false);
                 }}
                 className={cn(
-                  "w-full h-8 rounded-md border transition-all duration-200 hover:scale-105",
+                  "w-full h-8 rounded-md border transition-all duration-200 hover:scale-105 hover:shadow-sm",
                   color === presetColor && "ring-2 ring-artcraft-accent"
                 )}
                 style={{ backgroundColor: presetColor }}

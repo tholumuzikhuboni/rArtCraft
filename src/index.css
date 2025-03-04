@@ -118,7 +118,7 @@
 
 @layer components {
   .glass {
-    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm;
+    @apply bg-white/90 backdrop-blur-md border border-white/30 shadow-sm;
   }
   
   .tool-button {
@@ -129,7 +129,21 @@
     @apply bg-artcraft-accent/10 border-artcraft-accent/20 text-artcraft-accent;
   }
   
-  .tool-button:hover:not(.active) {
+  .tool-button:hover:not(.active):not(:disabled) {
     @apply bg-artcraft-muted border-artcraft-muted;
+  }
+}
+
+@layer utilities {
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+  
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .delay-300 {
+    animation-delay: 300ms;
   }
 }

@@ -1,3 +1,4 @@
+
 import { Paintbrush, Eraser, Save, Trash, FileUp, FileDown, Undo, Redo } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ColorPicker } from './ColorPicker';
@@ -37,24 +38,34 @@ export const Toolbar = ({
   const [showConfirmClear, setShowConfirmClear] = useState(false);
   
   return (
-    <div className="glass rounded-xl p-3 flex flex-col gap-4 items-center w-16 fixed left-4 top-1/2 transform -translate-y-1/2 z-10">
+    <div className="glass rounded-xl p-3 flex flex-col gap-4 items-center w-16 fixed left-4 top-1/2 transform -translate-y-1/2 z-10 transition-all duration-300 hover:shadow-lg">
       <div className="flex flex-col gap-2">
         <button
           onClick={() => onToolChange('brush')}
-          className={cn("tool-button", currentTool === 'brush' && "active")}
+          className={cn(
+            "tool-button transition-all duration-200", 
+            currentTool === 'brush' 
+              ? "active bg-artcraft-accent/10 text-artcraft-accent shadow-inner" 
+              : "hover:bg-artcraft-muted/80"
+          )}
           aria-label="Brush tool"
           title="Brush"
         >
-          <Paintbrush className="h-5 w-5" />
+          <Paintbrush className={cn("h-5 w-5", currentTool === 'brush' && "animate-pulse-subtle")} />
         </button>
         
         <button
           onClick={() => onToolChange('eraser')}
-          className={cn("tool-button", currentTool === 'eraser' && "active")}
+          className={cn(
+            "tool-button transition-all duration-200", 
+            currentTool === 'eraser' 
+              ? "active bg-artcraft-accent/10 text-artcraft-accent shadow-inner" 
+              : "hover:bg-artcraft-muted/80"
+          )}
           aria-label="Eraser tool"
           title="Eraser"
         >
-          <Eraser className="h-5 w-5" />
+          <Eraser className={cn("h-5 w-5", currentTool === 'eraser' && "animate-pulse-subtle")} />
         </button>
         
         <ColorPicker color={currentColor} onChange={onColorChange} />
@@ -84,7 +95,12 @@ export const Toolbar = ({
         {onUndo && (
           <button
             onClick={onUndo}
-            className={cn("tool-button", !canUndo && "opacity-50 cursor-not-allowed")}
+            className={cn(
+              "tool-button transition-all duration-200", 
+              !canUndo 
+                ? "opacity-50 cursor-not-allowed" 
+                : "hover:bg-artcraft-muted/80"
+            )}
             aria-label="Undo"
             title="Undo"
             disabled={!canUndo}
@@ -96,7 +112,12 @@ export const Toolbar = ({
         {onRedo && (
           <button
             onClick={onRedo}
-            className={cn("tool-button", !canRedo && "opacity-50 cursor-not-allowed")}
+            className={cn(
+              "tool-button transition-all duration-200", 
+              !canRedo 
+                ? "opacity-50 cursor-not-allowed" 
+                : "hover:bg-artcraft-muted/80"
+            )}
             aria-label="Redo"
             title="Redo"
             disabled={!canRedo}
@@ -107,7 +128,7 @@ export const Toolbar = ({
         
         <button
           onClick={onSave}
-          className="tool-button hover:bg-artcraft-muted"
+          className="tool-button hover:bg-artcraft-muted/80 transition-all duration-200 hover:scale-105"
           aria-label="Save canvas"
           title="Save"
         >
@@ -116,7 +137,7 @@ export const Toolbar = ({
         
         <button
           onClick={onLoad}
-          className="tool-button hover:bg-artcraft-muted"
+          className="tool-button hover:bg-artcraft-muted/80 transition-all duration-200 hover:scale-105"
           aria-label="Load saved canvas"
           title="Load"
         >
@@ -125,7 +146,7 @@ export const Toolbar = ({
         
         <button
           onClick={() => setShowConfirmClear(true)}
-          className="tool-button hover:bg-red-100 hover:text-red-500 hover:border-red-200"
+          className="tool-button hover:bg-red-100 hover:text-red-500 hover:border-red-200 transition-all duration-200"
           aria-label="Clear canvas"
           title="Clear"
         >
@@ -134,21 +155,21 @@ export const Toolbar = ({
       </div>
       
       {showConfirmClear && (
-        <div className="absolute left-full ml-3 glass rounded-lg p-3 w-40 animate-fade-in">
-          <p className="text-sm text-artcraft-primary mb-2">Clear canvas?</p>
+        <div className="absolute left-full ml-3 glass rounded-lg p-3 w-40 animate-scale-in z-10 shadow-lg border border-white/30">
+          <p className="text-sm font-medium text-artcraft-primary mb-2">Clear canvas?</p>
           <div className="flex justify-between gap-2">
             <button
               onClick={() => {
                 onClear();
                 setShowConfirmClear(false);
               }}
-              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm"
+              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm transition-colors"
             >
               Clear
             </button>
             <button
               onClick={() => setShowConfirmClear(false)}
-              className="px-3 py-1 bg-artcraft-muted hover:bg-artcraft-muted/80 text-artcraft-primary rounded-md text-sm"
+              className="px-3 py-1 bg-artcraft-muted hover:bg-artcraft-muted/80 text-artcraft-primary rounded-md text-sm transition-colors"
             >
               Cancel
             </button>

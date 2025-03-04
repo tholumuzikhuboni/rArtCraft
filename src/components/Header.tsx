@@ -23,11 +23,13 @@ export const Header = ({ onExport }: HeaderProps) => {
   return (
     <header className={cn(
       "fixed top-0 left-0 right-0 z-20 transition-all duration-300",
-      scrolled ? "py-2 bg-white/80 backdrop-blur-md shadow-sm" : "py-4 bg-transparent"
+      scrolled 
+        ? "py-2 bg-white/90 backdrop-blur-md shadow-sm" 
+        : "py-4 bg-transparent"
     )}>
       <div className="container flex justify-between items-center">
         <div className="flex items-center">
-          <h1 className="text-2xl font-bold bg-clip-text text-artcraft-primary">
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-artcraft-primary to-artcraft-accent">
             r/ArtCraft
           </h1>
           <div className="h-6 w-px bg-artcraft-muted mx-4"></div>
@@ -40,7 +42,7 @@ export const Header = ({ onExport }: HeaderProps) => {
           {onExport && (
             <button
               onClick={onExport}
-              className="px-3 py-1.5 rounded-lg flex items-center gap-1.5 bg-artcraft-muted hover:bg-artcraft-muted/80 text-artcraft-primary text-sm transition-colors"
+              className="px-3 py-1.5 rounded-lg flex items-center gap-1.5 bg-artcraft-muted hover:bg-artcraft-muted/80 text-artcraft-primary text-sm transition-colors hover:shadow-sm"
             >
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Export</span>
