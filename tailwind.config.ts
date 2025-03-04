@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -32,7 +31,7 @@ export default {
 				artcraft: {
 					primary: '#242424',
 					secondary: '#525252',
-					accent: '#7C3AED',
+					accent: '#F97316',
 					muted: '#F3F4F6',
 					light: '#FAFAFA'
 				},

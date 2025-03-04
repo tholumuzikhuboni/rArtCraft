@@ -1,13 +1,14 @@
 
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Download, Info } from 'lucide-react';
+import { Download, Info, Menu } from 'lucide-react';
 
 interface HeaderProps {
   onExport?: () => void;
+  onToggleSidebar?: () => void;
 }
 
-export const Header = ({ onExport }: HeaderProps) => {
+export const Header = ({ onExport, onToggleSidebar }: HeaderProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   
@@ -22,14 +23,23 @@ export const Header = ({ onExport }: HeaderProps) => {
   
   return (
     <header className={cn(
-      "fixed top-0 left-0 right-0 z-20 transition-all duration-300",
+      "fixed top-0 left-0 right-0 z-20 transition-all duration-300 shadow-md",
       scrolled 
-        ? "py-2 bg-white/90 backdrop-blur-md shadow-sm" 
-        : "py-4 bg-transparent"
+        ? "py-2 bg-white/90 backdrop-blur-md" 
+        : "py-4 bg-white/95"
     )}>
       <div className="container flex justify-between items-center">
         <div className="flex items-center">
-          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-artcraft-primary to-artcraft-accent">
+          {onToggleSidebar && (
+            <button
+              onClick={onToggleSidebar}
+              className="mr-3 w-8 h-8 rounded-full flex items-center justify-center text-artcraft-primary hover:bg-artcraft-muted transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-artcraft-accent to-orange-300">
             r/ArtCraft
           </h1>
           <div className="h-6 w-px bg-artcraft-muted mx-4"></div>
