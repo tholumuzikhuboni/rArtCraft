@@ -1,4 +1,4 @@
-
+.
 -- Create a function to fetch user badges
 CREATE OR REPLACE FUNCTION public.get_user_badges(user_id_param UUID)
 RETURNS SETOF user_badges
