@@ -1,4 +1,3 @@
-.
 import { useEffect, useState } from 'react';
 import { X, Heart, Download, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
