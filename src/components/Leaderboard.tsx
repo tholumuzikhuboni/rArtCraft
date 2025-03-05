@@ -1,4 +1,3 @@
-.
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Medal, Star, Trophy, Award, Clock } from 'lucide-react';
