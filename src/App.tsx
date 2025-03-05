@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
 import Gallery from "./pages/Gallery";
 import Communities from "./pages/Communities";
+import CommunityDetail from "./pages/CommunityDetail";
 import Challenges from "./pages/Challenges";
 import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
@@ -42,6 +43,11 @@ const App = () => (
             <Route path="/communities" element={
               <AuthCheck>
                 <Communities />
+              </AuthCheck>
+            } />
+            <Route path="/communities/:communityId" element={
+              <AuthCheck>
+                <CommunityDetail />
               </AuthCheck>
             } />
             <Route path="/challenges" element={
