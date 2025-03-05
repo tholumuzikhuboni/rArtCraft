@@ -1,4 +1,4 @@
-
+.
 export interface DrawingSettings {
   color: string;
   brushSize: number;
