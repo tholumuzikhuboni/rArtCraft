@@ -1,4 +1,3 @@
-.
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, Link } from "react-router-dom";
 import { AlertCircle, Home, LogIn } from "lucide-react";
