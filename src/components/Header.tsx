@@ -1,4 +1,3 @@
-.
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Download, Info, Menu, LogIn, UserCircle, LogOut, Image, Users, Trophy, User } from 'lucide-react';
