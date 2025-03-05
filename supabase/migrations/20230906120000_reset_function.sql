@@ -1,4 +1,4 @@
-
+.
 -- Create function to manually reset the leaderboard
 CREATE OR REPLACE FUNCTION public.reset_leaderboard_manual()
 RETURNS void
