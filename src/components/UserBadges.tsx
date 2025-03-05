@@ -33,9 +33,9 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase.rpc('get_user_badges', {
-        user_id_param: userId
-      });
+      const { data, error } = await supabase
+        .rpc('get_user_badges', { user_id_param: userId })
+        .returns<UserBadge[]>();
         
       if (error) {
         console.error('Error fetching badges:', error);
@@ -43,7 +43,7 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
       }
       
       if (data) {
-        setBadges(data as UserBadge[]);
+        setBadges(data);
       } else {
         setBadges([]);
       }
