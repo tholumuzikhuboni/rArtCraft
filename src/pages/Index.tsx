@@ -142,7 +142,7 @@ const Index = () => {
           
           <div className="border-t border-artcraft-muted/30 pt-6 flex flex-col sm:flex-row justify-between items-center">
             <p className="text-sm text-artcraft-secondary mb-4 sm:mb-0">
-              &copy; {new Date().getFullYear()} r/ArtCraft — Made with <Heart className="h-3 w-3 inline text-red-500" /> for Reddit Hackathon
+              &copy; {new Date().getFullYear()} r/ArtCraft — Made with <Heart className="h-3 w-3 inline text-red-500" /> for Kiddies Worldwide
             </p>
             <div className="flex items-center gap-4">
               <a 
