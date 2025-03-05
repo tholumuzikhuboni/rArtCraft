@@ -1,4 +1,4 @@
-
+.
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Trophy, Medal, Star, BadgeCheck } from 'lucide-react';
