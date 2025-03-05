@@ -1,4 +1,3 @@
-.
 import { useState } from 'react';
 import { Heart, Share2, Eye, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
