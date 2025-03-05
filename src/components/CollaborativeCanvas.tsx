@@ -1,4 +1,4 @@
-
+.
 import { useRef, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { Toolbar } from './Toolbar';
