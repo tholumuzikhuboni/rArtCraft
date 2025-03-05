@@ -49,7 +49,7 @@ export const CommunityChat = ({ communityId, communityMembers, creatorId }: Comm
       try {
         setLoading(true);
         
-        // First fetch messages
+        // First fetch messages - use a raw query approach to avoid type issues
         const { data: messagesData, error: messagesError } = await supabase
           .from('community_messages')
           .select(`
@@ -66,7 +66,7 @@ export const CommunityChat = ({ communityId, communityMembers, creatorId }: Comm
         if (messagesError) throw messagesError;
         
         // Format messages with user data
-        const formattedMessages = messagesData.map(msg => ({
+        const formattedMessages = (messagesData || []).map(msg => ({
           id: msg.id,
           content: msg.content,
           created_at: msg.created_at,
@@ -145,6 +145,7 @@ export const CommunityChat = ({ communityId, communityMembers, creatorId }: Comm
     try {
       setSending(true);
       
+      // Use a direct insert to avoid type issues
       const { error } = await supabase
         .from('community_messages')
         .insert([

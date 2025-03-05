@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -58,7 +57,6 @@ const CommunityDetail = () => {
     try {
       setLoading(true);
       
-      // Fetch community details
       const { data: communityData, error: communityError } = await supabase
         .from('communities')
         .select('*')
@@ -69,31 +67,32 @@ const CommunityDetail = () => {
       
       setCommunity(communityData);
       
-      // Fetch community members with user details
       const { data: membersData, error: membersError } = await supabase
         .from('community_members')
-        .select(`
-          id,
-          user_id,
-          role,
-          profiles(username, avatar_url)
-        `)
+        .select('id, user_id, role')
         .eq('community_id', communityId);
         
       if (membersError) throw membersError;
       
-      // Format the members data
-      const formattedMembers = membersData.map(member => ({
-        id: member.id,
-        user_id: member.user_id,
-        role: member.role,
-        username: member.profiles?.username || 'Unknown User',
-        avatar_url: member.profiles?.avatar_url
-      }));
+      const memberPromises = membersData.map(async (member) => {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('username, avatar_url')
+          .eq('id', member.user_id)
+          .single();
+          
+        return {
+          id: member.id,
+          user_id: member.user_id,
+          role: member.role,
+          username: profileData?.username || 'Unknown User',
+          avatar_url: profileData?.avatar_url
+        };
+      });
       
+      const formattedMembers = await Promise.all(memberPromises);
       setMembers(formattedMembers);
       
-      // Check if current user is a member
       if (user) {
         const userMember = membersData.find(member => member.user_id === user.id);
         setIsMember(!!userMember);
@@ -114,7 +113,6 @@ const CommunityDetail = () => {
       setJoining(true);
       
       if (isMember) {
-        // Leave community
         const { error } = await supabase
           .from('community_members')
           .delete()
@@ -126,7 +124,6 @@ const CommunityDetail = () => {
         toast.success('Left community');
         setIsMember(false);
       } else {
-        // Join community
         const { error } = await supabase
           .from('community_members')
           .insert([
@@ -143,7 +140,6 @@ const CommunityDetail = () => {
         setIsMember(true);
       }
       
-      // Refresh members list
       fetchCommunityDetails();
     } catch (error) {
       console.error('Error toggling community membership:', error);
@@ -264,7 +260,6 @@ const CommunityDetail = () => {
             </div>
           </div>
           
-          {/* Tabs for Mobile */}
           <div className="sm:hidden flex border-b mb-4">
             <button
               className={cn(
@@ -304,7 +299,6 @@ const CommunityDetail = () => {
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Collaborative Canvas */}
           <div className={cn(
             "md:col-span-2",
             activeTab !== 'canvas' && 'hidden sm:block'
@@ -313,6 +307,7 @@ const CommunityDetail = () => {
               <CollaborativeCanvas 
                 communityId={communityId || ''} 
                 showMembersList={() => setMembersDialogOpen(true)} 
+                onLoad={() => {}}
               />
             ) : (
               <div className="relative rounded-xl overflow-hidden shadow-lg border border-canvas-border">
@@ -338,7 +333,6 @@ const CommunityDetail = () => {
             )}
           </div>
           
-          {/* Chat */}
           <div className={cn(
             activeTab !== 'chat' && 'hidden sm:block'
           )}>
@@ -371,7 +365,6 @@ const CommunityDetail = () => {
         </div>
       </main>
       
-      {/* Community Members Dialog */}
       <CommunityMembers
         communityId={communityId || ''}
         members={members}
