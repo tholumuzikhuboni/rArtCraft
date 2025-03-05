@@ -33,12 +33,12 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
     try {
       setLoading(true);
       
-      // To fix TypeScript error, we need to properly type the RPC call
-      // Using PostgrestRpcBuilder directly to avoid type issues with custom functions
-      const { data, error } = await supabase.rpc(
+      // Fix TypeScript error by using type assertions properly
+      // Since the rpc method doesn't know about our custom function, we need to use type assertions
+      const { data, error } = await (supabase.rpc(
         'get_user_badges', 
         { user_id_param: userId }
-      );
+      ) as any);
         
       if (error) {
         console.error('Error fetching badges:', error);
@@ -47,7 +47,7 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
       
       if (data) {
         // Explicitly type the data as UserBadge[] before setting state
-        setBadges(data as unknown as UserBadge[]);
+        setBadges(data as UserBadge[]);
       } else {
         setBadges([]);
       }
