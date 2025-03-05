@@ -33,9 +33,10 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
     try {
       setLoading(true);
       
-      // Use the raw SQL query to fetch data from user_badges table
+      // Use the RPC function to fetch data from user_badges table
+      // Cast the result to any to avoid TypeScript errors with the custom RPC
       const { data, error } = await supabase
-        .rpc('get_user_badges', { user_id_param: userId });
+        .rpc('get_user_badges', { user_id_param: userId }) as any;
         
       if (error) {
         console.error('Error fetching badges:', error);
