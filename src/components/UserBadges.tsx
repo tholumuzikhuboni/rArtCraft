@@ -33,18 +33,20 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
     try {
       setLoading(true);
       
+      // Use the raw SQL query to fetch data from user_badges table
       const { data, error } = await supabase
-        .from('user_badges')
-        .select('*')
-        .eq('user_id', userId)
-        .order('earned_at', { ascending: false });
+        .rpc('get_user_badges', { user_id_param: userId });
         
       if (error) {
         console.error('Error fetching badges:', error);
         return;
       }
       
-      setBadges(data || []);
+      if (data) {
+        setBadges(data as UserBadge[]);
+      } else {
+        setBadges([]);
+      }
     } catch (error) {
       console.error('Error:', error);
     } finally {
