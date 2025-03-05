@@ -49,21 +49,32 @@ export const CommunityChat = ({ communityId, communityMembers, creatorId }: Comm
       try {
         setLoading(true);
         
-        // First fetch messages - use a raw query approach to avoid type issues
+        // Use a different approach to fetch messages and join with profiles
         const { data: messagesData, error: messagesError } = await supabase
           .from('community_messages')
-          .select(`
-            id,
-            content,
-            created_at,
-            user_id,
-            profiles(username, avatar_url)
-          `)
+          .select('id, content, created_at, user_id')
           .eq('community_id', communityId)
           .order('created_at', { ascending: true })
           .limit(100);
           
         if (messagesError) throw messagesError;
+        
+        // Get all user IDs from messages to fetch their profiles
+        const userIds = [...new Set((messagesData || []).map(msg => msg.user_id))];
+        
+        // Fetch profiles for all users who sent messages
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, username, avatar_url')
+          .in('id', userIds);
+          
+        if (profilesError) throw profilesError;
+        
+        // Create a map of user profiles for quick lookup
+        const profileMap = (profilesData || []).reduce((acc, profile) => {
+          acc[profile.id] = profile;
+          return acc;
+        }, {} as Record<string, any>);
         
         // Format messages with user data
         const formattedMessages = (messagesData || []).map(msg => ({
@@ -71,8 +82,8 @@ export const CommunityChat = ({ communityId, communityMembers, creatorId }: Comm
           content: msg.content,
           created_at: msg.created_at,
           user_id: msg.user_id,
-          username: msg.profiles?.username || 'Unknown User',
-          avatar_url: msg.profiles?.avatar_url,
+          username: profileMap[msg.user_id]?.username || 'Unknown User',
+          avatar_url: profileMap[msg.user_id]?.avatar_url,
           role: communityMembers.find(m => m.user_id === msg.user_id)?.role
         }));
         

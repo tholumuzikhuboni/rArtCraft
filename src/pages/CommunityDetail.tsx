@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -307,7 +308,6 @@ const CommunityDetail = () => {
               <CollaborativeCanvas 
                 communityId={communityId || ''} 
                 showMembersList={() => setMembersDialogOpen(true)} 
-                onLoad={() => {}}
               />
             ) : (
               <div className="relative rounded-xl overflow-hidden shadow-lg border border-canvas-border">

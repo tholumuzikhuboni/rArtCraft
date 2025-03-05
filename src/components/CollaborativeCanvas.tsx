@@ -310,6 +310,12 @@ export const CollaborativeCanvas = ({
       toast("Redo");
     }
   };
+
+  // Add this function to handle loading saved canvas data
+  const handleLoadCanvas = () => {
+    loadCommunityCanvas();
+    toast("Reloaded community canvas");
+  };
   
   return (
     <div className="relative canvas-container">
@@ -346,6 +352,7 @@ export const CollaborativeCanvas = ({
         onBrushSizeChange={(size) => setSettings({ ...settings, brushSize: size })}
         onSave={handleSave}
         onClear={handleClear}
+        onLoad={handleLoadCanvas}
         onUndo={handleUndo}
         onRedo={handleRedo}
         canUndo={historyIndex > 0}
