@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Canvas } from '@/components/Canvas';
 import { Header } from '@/components/Header';
@@ -63,7 +64,7 @@ const Index = () => {
         
         {exportedImage && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-30 p-4 animate-fade-in">
-            <div className="glass rounded-xl p-6 max-w-3xl w-full max-h-[90vh] overflow-auto animate-scale-in">
+            <div className="glass rounded-xl p-4 sm:p-6 max-w-md w-full max-h-[90vh] overflow-auto animate-scale-in mx-auto">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-artcraft-primary">Your Artwork</h3>
                 <button
@@ -82,7 +83,13 @@ const Index = () => {
                 />
               </div>
               
-              <div className="flex justify-end">
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  onClick={() => setExportedImage(null)}
+                  className="px-4 py-2 bg-artcraft-muted text-artcraft-primary rounded-lg hover:bg-artcraft-muted/80 transition-colors"
+                >
+                  Cancel
+                </button>
                 <a 
                   href={exportedImage}
                   download="artcraft-creation.png"

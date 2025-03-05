@@ -1,15 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
 import { Leaderboard as LeaderboardComponent } from '@/components/Leaderboard';
-import { Trophy, Medal, Award, Loader2, Clock, Calendar } from 'lucide-react';
+import { Trophy, Medal, Award } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
 
 type Artist = {
   id: string;
@@ -19,54 +17,8 @@ type Artist = {
   avatar_url: string | null;
 };
 
-type Challenge = {
-  id: string;
-  title: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  is_active: boolean;
-};
-
 const Leaderboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [loadingChallenges, setLoadingChallenges] = useState(true);
-  
-  useEffect(() => {
-    fetchActiveChallenges();
-  }, []);
-  
-  const fetchActiveChallenges = async () => {
-    try {
-      setLoadingChallenges(true);
-      const { data, error } = await supabase
-        .from('challenges')
-        .select('*')
-        .eq('is_active', true)
-        .order('start_date', { ascending: false })
-        .limit(3);
-        
-      if (error) {
-        console.error('Error fetching challenges:', error);
-        return;
-      }
-      
-      setChallenges(data || []);
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setLoadingChallenges(false);
-    }
-  };
-  
-  const getRemainingDays = (endDate: string) => {
-    const end = new Date(endDate);
-    const now = new Date();
-    const diffTime = end.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
-  };
   
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -119,57 +71,6 @@ const Leaderboard = () => {
                   </div>
                 </TabsContent>
               </Tabs>
-            </div>
-            
-            {/* Active Challenges Section */}
-            <div className="mt-8 bg-white/80 backdrop-blur-sm border border-artcraft-muted/20 rounded-xl shadow-sm p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-artcraft-primary">Active Challenges</h3>
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                  Earn Special Badges
-                </Badge>
-              </div>
-              
-              {loadingChallenges ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-artcraft-accent" />
-                </div>
-              ) : challenges.length > 0 ? (
-                <div className="space-y-6">
-                  {challenges.map((challenge) => (
-                    <div key={challenge.id} className="rounded-lg border border-artcraft-muted/30 p-4 hover:border-artcraft-accent/30 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-medium text-artcraft-primary">{challenge.title}</h4>
-                          <p className="text-sm text-artcraft-secondary mt-1">
-                            {challenge.description}
-                          </p>
-                        </div>
-                        <div className="flex items-center bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-sm">
-                          <Clock className="h-4 w-4 mr-1" />
-                          <span>{getRemainingDays(challenge.end_date)} days left</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center mt-4 text-xs text-artcraft-secondary">
-                        <Calendar className="h-3.5 w-3.5 mr-1" />
-                        <span>
-                          {new Date(challenge.start_date).toLocaleDateString()} - {new Date(challenge.end_date).toLocaleDateString()}
-                        </span>
-                      </div>
-                      
-                      <Link to={`/challenges`} className="inline-block mt-3 text-artcraft-accent text-sm font-medium hover:underline">
-                        Join Challenge →
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Award className="mx-auto h-12 w-12 text-artcraft-muted/30 mb-3" />
-                  <p className="text-artcraft-secondary">No active challenges at the moment</p>
-                </div>
-              )}
             </div>
           </div>
           
