@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Trophy, Medal, Award, Star, BadgeCheck } from 'lucide-react';
+import { Trophy, Medal, Star, BadgeCheck } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -33,9 +33,11 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
     try {
       setLoading(true);
       
+      // Fix the TypeScript error by specifying the return type properly
       const { data, error } = await supabase
-        .rpc('get_user_badges', { user_id_param: userId })
-        .returns<UserBadge[]>();
+        .from('user_badges')
+        .select('*')
+        .eq('user_id', userId);
         
       if (error) {
         console.error('Error fetching badges:', error);
@@ -43,7 +45,7 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
       }
       
       if (data) {
-        setBadges(data);
+        setBadges(data as UserBadge[]);
       } else {
         setBadges([]);
       }

@@ -8,10 +8,34 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { Loader2, Search, MoreVertical, Heart, Download, Share, Trash, Eye, EyeOff } from 'lucide-react';
+import { 
+  Loader2, 
+  Search, 
+  MoreVertical, 
+  Heart, 
+  HeartOff,
+  Download, 
+  Share, 
+  Trash, 
+  Eye, 
+  EyeOff,
+  FacebookIcon,
+  TwitterIcon,
+  LinkedinIcon,
+  Instagram,
+  Copy,
+  ExternalLink
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Drawing {
@@ -22,6 +46,7 @@ interface Drawing {
   user_id: string;
   is_public: boolean;
   username?: string;
+  liked?: boolean;
 }
 
 export default function Gallery() {
@@ -31,6 +56,9 @@ export default function Gallery() {
   const [myDrawings, setMyDrawings] = useState<Drawing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDrawing, setSelectedDrawing] = useState<Drawing | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchDrawings();
@@ -64,7 +92,8 @@ export default function Gallery() {
             
             return {
               ...drawing,
-              username: profileData?.username || 'Unknown artist'
+              username: profileData?.username || 'Unknown artist',
+              liked: false // Initialize liked status
             };
           })
         );
@@ -172,6 +201,67 @@ export default function Gallery() {
     document.body.removeChild(a);
   };
 
+  const toggleLike = (drawingId: string) => {
+    // For frontend demo only without backend persistence
+    setAllDrawings(prev => 
+      prev.map(drawing => 
+        drawing.id === drawingId 
+          ? { ...drawing, liked: !drawing.liked } 
+          : drawing
+      )
+    );
+    
+    toast.success("Like status updated");
+  };
+
+  const viewDrawing = (drawing: Drawing) => {
+    setSelectedDrawing(drawing);
+    setViewDialogOpen(true);
+  };
+
+  const shareDrawing = (drawing: Drawing) => {
+    setSelectedDrawing(drawing);
+    setShareDialogOpen(true);
+  };
+
+  const copyShareLink = () => {
+    if (selectedDrawing) {
+      // In a real app, this would be a shareable URL
+      const shareLink = `${window.location.origin}/drawing/${selectedDrawing.id}`;
+      navigator.clipboard.writeText(shareLink)
+        .then(() => toast.success("Link copied to clipboard"))
+        .catch(() => toast.error("Failed to copy link"));
+    }
+  };
+
+  const shareToSocial = (platform: string) => {
+    if (!selectedDrawing) return;
+    
+    // In a real app, these would be actual sharing URLs
+    const shareTitle = encodeURIComponent(`Check out this artwork: ${selectedDrawing.title}`);
+    const shareUrl = encodeURIComponent(`${window.location.origin}/drawing/${selectedDrawing.id}`);
+    
+    let shareLink = '';
+    
+    switch (platform) {
+      case 'facebook':
+        shareLink = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+        break;
+      case 'twitter':
+        shareLink = `https://twitter.com/intent/tweet?text=${shareTitle}&url=${shareUrl}`;
+        break;
+      case 'linkedin':
+        shareLink = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`;
+        break;
+      case 'instagram':
+        // Instagram doesn't have a direct share URL, so we just show a message
+        toast.info("Save the image and share it on Instagram");
+        return;
+    }
+    
+    window.open(shareLink, '_blank', 'width=600,height=400');
+  };
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -243,14 +333,22 @@ export default function Gallery() {
                       </div>
                     </div>
                     
-                    <CardFooter className="flex justify-between py-3">
-                      <div className="flex items-center">
+                    <CardFooter className="flex justify-between items-center py-3">
+                      <div className="flex items-center gap-1">
                         <Button 
                           size="icon" 
                           variant="ghost"
-                          className="h-8 w-8 text-artcraft-secondary"
+                          className={cn(
+                            "h-8 w-8", 
+                            drawing.liked ? "text-red-500" : "text-artcraft-secondary"
+                          )}
+                          onClick={() => toggleLike(drawing.id)}
                         >
-                          <Heart className="h-4 w-4" />
+                          {drawing.liked ? (
+                            <Heart className="h-4 w-4 fill-current" />
+                          ) : (
+                            <Heart className="h-4 w-4" />
+                          )}
                         </Button>
                         <Button 
                           size="icon" 
@@ -259,6 +357,22 @@ export default function Gallery() {
                           onClick={() => downloadDrawing(drawing.image_data, drawing.title)}
                         >
                           <Download className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="icon" 
+                          variant="ghost"
+                          className="h-8 w-8 text-artcraft-secondary"
+                          onClick={() => shareDrawing(drawing)}
+                        >
+                          <Share className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="icon" 
+                          variant="ghost"
+                          className="h-8 w-8 text-artcraft-secondary"
+                          onClick={() => viewDrawing(drawing)}
+                        >
+                          <Eye className="h-4 w-4" />
                         </Button>
                       </div>
                       
@@ -311,7 +425,7 @@ export default function Gallery() {
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="w-48">
                               <DropdownMenuItem onClick={() => togglePublicStatus(drawing.id, drawing.is_public)}>
                                 {drawing.is_public ? (
                                   <>
@@ -328,6 +442,14 @@ export default function Gallery() {
                               <DropdownMenuItem onClick={() => downloadDrawing(drawing.image_data, drawing.title)}>
                                 <Download className="h-4 w-4 mr-2" />
                                 <span>Download</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => shareDrawing(drawing)}>
+                                <Share className="h-4 w-4 mr-2" />
+                                <span>Share</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => viewDrawing(drawing)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                <span>View Full Size</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => deleteDrawing(drawing.id)}>
                                 <Trash className="h-4 w-4 mr-2 text-red-500" />
@@ -352,11 +474,11 @@ export default function Gallery() {
                         </div>
                       </div>
                       
-                      <CardContent className="pt-3 pb-0">
+                      <CardFooter className="flex justify-end py-3">
                         <div className="text-xs text-artcraft-secondary">
                           Created {new Date(drawing.created_at).toLocaleDateString()}
                         </div>
-                      </CardContent>
+                      </CardFooter>
                     </Card>
                   ))}
                 </div>
@@ -379,6 +501,125 @@ export default function Gallery() {
           )}
         </Tabs>
       </main>
+
+      {/* View Drawing Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-4xl w-[90vw] p-0 max-h-[90vh] overflow-auto">
+          {selectedDrawing && (
+            <div>
+              <div className="p-4 border-b">
+                <DialogTitle className="text-xl">{selectedDrawing.title}</DialogTitle>
+                <DialogDescription>
+                  By {selectedDrawing.username || 'Unknown artist'} • {new Date(selectedDrawing.created_at).toLocaleDateString()}
+                </DialogDescription>
+              </div>
+              <div className="p-4 flex justify-center">
+                <img 
+                  src={selectedDrawing.image_data} 
+                  alt={selectedDrawing.title}
+                  className="max-w-full max-h-[60vh] object-contain"
+                />
+              </div>
+              <div className="p-4 border-t flex justify-between">
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => toggleLike(selectedDrawing.id)}
+                  >
+                    {selectedDrawing.liked ? (
+                      <>
+                        <HeartOff className="h-4 w-4 mr-2" />
+                        Unlike
+                      </>
+                    ) : (
+                      <>
+                        <Heart className="h-4 w-4 mr-2" />
+                        Like
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => {
+                      setViewDialogOpen(false);
+                      setTimeout(() => shareDrawing(selectedDrawing), 300);
+                    }}
+                  >
+                    <Share className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => downloadDrawing(selectedDrawing.image_data, selectedDrawing.title)}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+        <DialogContent className="max-w-md w-[90vw]">
+          <DialogHeader>
+            <DialogTitle className="text-xl mb-2">Share this artwork</DialogTitle>
+            <DialogDescription>
+              Share "{selectedDrawing?.title}" with others
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-4 gap-4 my-4">
+            <Button variant="outline" className="flex flex-col items-center p-3" onClick={() => shareToSocial('facebook')}>
+              <FacebookIcon className="h-6 w-6 text-blue-600 mb-1" />
+              <span className="text-xs">Facebook</span>
+            </Button>
+            <Button variant="outline" className="flex flex-col items-center p-3" onClick={() => shareToSocial('twitter')}>
+              <TwitterIcon className="h-6 w-6 text-blue-400 mb-1" />
+              <span className="text-xs">Twitter</span>
+            </Button>
+            <Button variant="outline" className="flex flex-col items-center p-3" onClick={() => shareToSocial('linkedin')}>
+              <LinkedinIcon className="h-6 w-6 text-blue-700 mb-1" />
+              <span className="text-xs">LinkedIn</span>
+            </Button>
+            <Button variant="outline" className="flex flex-col items-center p-3" onClick={() => shareToSocial('instagram')}>
+              <Instagram className="h-6 w-6 text-pink-600 mb-1" />
+              <span className="text-xs">Instagram</span>
+            </Button>
+          </div>
+          
+          <div className="flex items-center space-x-2 mt-4">
+            <Input 
+              value={selectedDrawing ? `${window.location.origin}/drawing/${selectedDrawing.id}` : ''}
+              readOnly
+              className="flex-1"
+            />
+            <Button size="icon" variant="outline" onClick={copyShareLink}>
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="mt-4 pt-4 border-t flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => setShareDialogOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      <footer className="border-t border-artcraft-muted/50 py-6 bg-white/50">
+        <div className="container text-center">
+          <p className="text-sm text-artcraft-secondary">
+            &copy; {new Date().getFullYear()} r/ArtCraft — All rights reserved
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
