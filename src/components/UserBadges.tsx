@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Trophy, Medal, Award, Star, BadgeCheck } from 'lucide-react';
@@ -33,12 +32,9 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
     try {
       setLoading(true);
       
-      // Fix TypeScript error by using type assertions properly
-      // Since the rpc method doesn't know about our custom function, we need to use type assertions
-      const { data, error } = await (supabase.rpc(
-        'get_user_badges', 
-        { user_id_param: userId }
-      ) as any);
+      const { data, error } = await supabase.rpc('get_user_badges', {
+        user_id_param: userId
+      }).returns<UserBadge[]>();
         
       if (error) {
         console.error('Error fetching badges:', error);
@@ -46,8 +42,7 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
       }
       
       if (data) {
-        // Explicitly type the data as UserBadge[] before setting state
-        setBadges(data as UserBadge[]);
+        setBadges(data);
       } else {
         setBadges([]);
       }
