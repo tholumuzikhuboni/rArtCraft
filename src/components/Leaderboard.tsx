@@ -1,11 +1,12 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Medal, Star, Trophy, Award } from 'lucide-react';
+import { Medal, Star, Trophy, Award, Clock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 type LeaderboardUser = {
   username: string;
@@ -18,10 +19,33 @@ type LeaderboardUser = {
 export const Leaderboard = () => {
   const [users, setUsers] = useState<LeaderboardUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [nextReset, setNextReset] = useState<string>('');
 
   useEffect(() => {
     fetchLeaderboardData();
+    calculateNextReset();
+    
+    // Set up a timer to recalculate the next reset time
+    const timer = setInterval(calculateNextReset, 60000); // Update every minute
+    
+    return () => clearInterval(timer);
   }, []);
+  
+  const calculateNextReset = () => {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 is Sunday
+    const daysUntilSunday = dayOfWeek === 0 ? 7 : 7 - dayOfWeek;
+    
+    const nextSunday = new Date(now);
+    nextSunday.setDate(now.getDate() + daysUntilSunday);
+    nextSunday.setHours(0, 0, 0, 0);
+    
+    const timeRemaining = nextSunday.getTime() - now.getTime();
+    const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    
+    setNextReset(`${days}d ${hours}h`);
+  };
 
   const fetchLeaderboardData = async () => {
     try {
@@ -138,7 +162,14 @@ export const Leaderboard = () => {
 
   return (
     <div className="p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-artcraft-muted/20">
-      <h3 className="font-medium text-artcraft-primary mb-3">Top Artists</h3>
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="font-medium text-artcraft-primary">Top Artists</h3>
+        <div className="flex items-center text-xs text-artcraft-secondary">
+          <Clock className="h-3 w-3 mr-1" />
+          <span>Resets in: {nextReset}</span>
+        </div>
+      </div>
+      
       <div className="space-y-3">
         {users.slice(0, 5).map((user) => (
           <Link key={user.id} to={`/user/${user.id}`} className="flex items-center gap-3 group hover:bg-artcraft-muted/10 p-2 rounded-md transition-colors">
@@ -177,6 +208,15 @@ export const Leaderboard = () => {
             </div>
           </Link>
         ))}
+      </div>
+      
+      <div className="mt-3 pt-3 border-t border-artcraft-muted/20">
+        <Badge variant="outline" className="bg-artcraft-accent/5 text-artcraft-accent hover:bg-artcraft-accent/10">
+          Weekly Competition
+        </Badge>
+        <p className="mt-2 text-xs text-artcraft-secondary">
+          Top 3 artists each week receive special badges on their profile!
+        </p>
       </div>
     </div>
   );

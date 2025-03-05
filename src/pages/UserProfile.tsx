@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserBadges } from '@/components/UserBadges';
 
 type Profile = {
   id: string;
@@ -174,6 +175,12 @@ const UserProfile = () => {
                   <p className="text-xs text-artcraft-secondary">Artworks</p>
                 </div>
               </div>
+              
+              {userId && (
+                <div className="mt-6 w-full">
+                  <UserBadges userId={userId} />
+                </div>
+              )}
             </div>
             
             <div className="flex-1">
