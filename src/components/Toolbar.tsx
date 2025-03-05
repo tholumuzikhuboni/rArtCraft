@@ -1,4 +1,3 @@
-.
 import { Paintbrush, Eraser, Save, Trash, FileUp, FileDown, Undo, Redo } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ColorPicker } from './ColorPicker';
