@@ -1,4 +1,3 @@
-.
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, Palette, Users, Trophy, LayoutGrid, User, Image } from 'lucide-react';
