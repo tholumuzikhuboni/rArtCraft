@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,8 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { Loader2, CalendarDays, Trophy, Clock, Users, ArrowRight } from 'lucide-react';
+import { 
+  Loader2, CalendarDays, Trophy, Clock, Users, ArrowRight, 
+  Sparkles, Award, Flame, Palette, Bookmark
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Challenge {
   id: string;
@@ -28,6 +33,7 @@ export default function Challenges() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchChallenges();
@@ -105,17 +111,29 @@ export default function Challenges() {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Get a random icon for each challenge
+  const getChallengeIcon = (index: number) => {
+    const icons = [
+      <Palette className="h-8 w-8 text-pink-500" />,
+      <Sparkles className="h-8 w-8 text-purple-500" />,
+      <Trophy className="h-8 w-8 text-yellow-500" />,
+      <Award className="h-8 w-8 text-blue-500" />,
+      <Flame className="h-8 w-8 text-red-500" />
+    ];
+    return icons[index % icons.length];
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-artcraft-muted/20">
       <Header onToggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       
       <main className={cn(
-        "container pt-24 pb-12 transition-all duration-300",
-        sidebarOpen ? "ml-64" : "ml-0"
+        "container px-4 sm:px-6 pt-24 pb-12 transition-all duration-300",
+        sidebarOpen && !isMobile ? "ml-64" : "ml-0"
       )}>
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-artcraft-primary mb-2">Art Challenges</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-artcraft-primary mb-2">Art Challenges</h2>
           <p className="text-artcraft-secondary">
             Join creative challenges and showcase your artistic skills
           </p>
@@ -127,25 +145,50 @@ export default function Challenges() {
           </div>
         ) : challenges.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {challenges.map(challenge => (
+            {challenges.map((challenge, index) => (
               <Card 
                 key={challenge.id} 
                 className={cn(
                   "border overflow-hidden hover:shadow-md transition-shadow",
-                  challenge.days_remaining === 0 && "border-amber-300 bg-amber-50"
+                  challenge.days_remaining === 0 && "border-amber-300 bg-amber-50",
+                  challenge.has_submitted && "border-green-300 bg-green-50/50"
                 )}
               >
-                <div className="h-2 bg-gradient-to-r from-artcraft-accent to-orange-400" />
+                <div className={cn(
+                  "h-2 bg-gradient-to-r",
+                  index % 5 === 0 && "from-pink-400 to-purple-500",
+                  index % 5 === 1 && "from-blue-400 to-indigo-500",
+                  index % 5 === 2 && "from-green-400 to-teal-500",
+                  index % 5 === 3 && "from-orange-400 to-amber-500",
+                  index % 5 === 4 && "from-red-400 to-rose-500"
+                )} />
                 
                 <CardHeader>
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-xl">{challenge.title}</CardTitle>
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "rounded-full p-2",
+                        index % 5 === 0 && "bg-pink-100",
+                        index % 5 === 1 && "bg-blue-100",
+                        index % 5 === 2 && "bg-green-100",
+                        index % 5 === 3 && "bg-amber-100",
+                        index % 5 === 4 && "bg-red-100"
+                      )}>
+                        {getChallengeIcon(index)}
+                      </div>
+                      <CardTitle className="text-xl">{challenge.title}</CardTitle>
+                    </div>
+                    
                     {challenge.days_remaining === 0 ? (
                       <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full">
                         Ending Today
                       </span>
-                    ) : (
+                    ) : challenge.has_submitted ? (
                       <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                        Submitted
+                      </span>
+                    ) : (
+                      <span className="bg-artcraft-accent text-white text-xs px-2 py-1 rounded-full">
                         Active
                       </span>
                     )}
@@ -167,7 +210,10 @@ export default function Challenges() {
                     
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-artcraft-accent" />
-                      <span className="text-artcraft-secondary">
+                      <span className={cn(
+                        "text-artcraft-secondary",
+                        challenge.days_remaining <= 2 && "text-amber-600 font-medium"
+                      )}>
                         {challenge.days_remaining} days left
                       </span>
                     </div>
@@ -195,8 +241,10 @@ export default function Challenges() {
                       className="w-full"
                     >
                       <Button 
-                        className="w-full"
-                        variant={challenge.has_submitted ? "outline" : "default"}
+                        className={cn("w-full", 
+                          challenge.has_submitted && "bg-green-600 hover:bg-green-700"
+                        )}
+                        variant={challenge.has_submitted ? "default" : "default"}
                       >
                         {challenge.has_submitted 
                           ? "View Your Submission" 
@@ -226,35 +274,49 @@ export default function Challenges() {
         )}
         
         <div className="mt-12 bg-gradient-to-r from-artcraft-accent/20 to-orange-200/20 p-6 rounded-lg">
-          <h3 className="text-xl font-bold text-artcraft-primary mb-2">How Challenges Work</h3>
-          <p className="text-artcraft-secondary mb-4">
-            Art challenges are a fun way to improve your skills and engage with the community.
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+            <div className="p-3 rounded-full bg-white/60 shadow-sm">
+              <Trophy className="h-8 w-8 text-artcraft-accent" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-artcraft-primary mb-1">How Challenges Work</h3>
+              <p className="text-artcraft-secondary">
+                Art challenges are a fun way to improve your skills and engage with the community.
+              </p>
+            </div>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-            <div className="bg-white/60 p-4 rounded-lg">
-              <div className="w-8 h-8 bg-artcraft-accent rounded-full flex items-center justify-center text-white font-bold mb-3">1</div>
+            <div className="bg-white/80 backdrop-blur-sm p-5 rounded-lg shadow-sm border border-white/50 transform transition-transform hover:scale-105">
+              <div className="w-10 h-10 bg-artcraft-accent rounded-full flex items-center justify-center text-white font-bold mb-3">1</div>
               <h4 className="font-medium text-artcraft-primary mb-2">Join a Challenge</h4>
               <p className="text-sm text-artcraft-secondary">
                 Browse active challenges and find one that inspires you.
               </p>
             </div>
             
-            <div className="bg-white/60 p-4 rounded-lg">
-              <div className="w-8 h-8 bg-artcraft-accent rounded-full flex items-center justify-center text-white font-bold mb-3">2</div>
+            <div className="bg-white/80 backdrop-blur-sm p-5 rounded-lg shadow-sm border border-white/50 transform transition-transform hover:scale-105">
+              <div className="w-10 h-10 bg-artcraft-accent rounded-full flex items-center justify-center text-white font-bold mb-3">2</div>
               <h4 className="font-medium text-artcraft-primary mb-2">Create Your Art</h4>
               <p className="text-sm text-artcraft-secondary">
                 Use our canvas to create artwork based on the challenge theme.
               </p>
             </div>
             
-            <div className="bg-white/60 p-4 rounded-lg">
-              <div className="w-8 h-8 bg-artcraft-accent rounded-full flex items-center justify-center text-white font-bold mb-3">3</div>
+            <div className="bg-white/80 backdrop-blur-sm p-5 rounded-lg shadow-sm border border-white/50 transform transition-transform hover:scale-105">
+              <div className="w-10 h-10 bg-artcraft-accent rounded-full flex items-center justify-center text-white font-bold mb-3">3</div>
               <h4 className="font-medium text-artcraft-primary mb-2">Submit & Share</h4>
               <p className="text-sm text-artcraft-secondary">
                 Submit your artwork and see what others in the community have created.
               </p>
             </div>
+          </div>
+          
+          <div className="flex justify-center mt-8">
+            <Button variant="outline" className="bg-white/80 gap-2">
+              <Bookmark className="h-4 w-4" />
+              View Past Challenges
+            </Button>
           </div>
         </div>
       </main>

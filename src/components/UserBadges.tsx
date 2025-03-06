@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Trophy, Medal, Star, BadgeCheck, Crown, Shield } from 'lucide-react';
+import { Trophy, Medal, Star, BadgeCheck, Crown, Shield, CheckCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -82,6 +82,8 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
         return <Crown className="h-5 w-5 text-amber-500" />;
       case 'admin':
         return <Shield className="h-5 w-5 text-purple-500" />;
+      case 'verified':
+        return <CheckCircle className="h-5 w-5 text-blue-500" />;
       case 'weekly_champion':
         return <Trophy className="h-5 w-5 text-yellow-500" />;
       case 'weekly_silver':
@@ -99,6 +101,8 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
         return "bg-amber-100 text-amber-800 border-amber-200";
       case 'admin':
         return "bg-purple-100 text-purple-800 border-purple-200";
+      case 'verified':
+        return "bg-blue-100 text-blue-800 border-blue-200";
       case 'weekly_champion':
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case 'weekly_silver':
