@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Trophy, Medal, Star, BadgeCheck } from 'lucide-react';
@@ -32,7 +33,7 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
     try {
       setLoading(true);
       
-      // Fix the TypeScript error by specifying the return type properly
+      // Get user badges from the database
       const { data, error } = await supabase
         .from('user_badges')
         .select('*')

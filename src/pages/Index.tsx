@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Canvas } from '@/components/Canvas';
 import { Header } from '@/components/Header';
@@ -40,13 +41,13 @@ const Index = () => {
       )}>
         <div className="mb-8 animate-slide-down">
           <div className="inline-block px-3 py-1 rounded-full bg-artcraft-accent/10 text-artcraft-accent text-xs font-medium mb-3 animate-fade-in">
-            Collaborative Art
+            Fun Art for Kids
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-artcraft-primary mb-3 tracking-tight">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-artcraft-accent to-orange-400">Create Together</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-artcraft-accent to-orange-400">Create & Share Your Art</span>
           </h2>
           <p className="text-artcraft-secondary max-w-2xl animate-fade-in delay-100">
-            Express your creativity on a shared canvas. Use the tools on the left to draw, erase, and save your artwork.
+            Express your creativity on our colorful canvas! Use the tools to draw, paint, and create amazing artwork that you can share with friends.
           </p>
         </div>
         
@@ -110,8 +111,8 @@ const Index = () => {
                 <Palette className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-bold text-lg text-artcraft-primary">r/ArtCraft</h3>
-                <p className="text-xs text-artcraft-secondary">A collaborative canvas experience</p>
+                <h3 className="font-bold text-lg text-artcraft-primary">ArtCraft for Kids</h3>
+                <p className="text-xs text-artcraft-secondary">A creative canvas for young artists</p>
               </div>
             </div>
             
@@ -119,19 +120,23 @@ const Index = () => {
               <a 
                 href="#" 
                 className="w-8 h-8 rounded-full bg-artcraft-muted flex items-center justify-center text-artcraft-primary hover:bg-artcraft-accent hover:text-white transition-colors"
-                aria-label="Reddit"
+                aria-label="Community"
               >
                 <MessageSquare className="h-4 w-4" />
               </a>
               <a 
-                href="#" 
+                href="https://twitter.com/share?url=https://artcraft-for-kids.vercel.app" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-artcraft-muted flex items-center justify-center text-artcraft-primary hover:bg-artcraft-accent hover:text-white transition-colors"
                 aria-label="Twitter"
               >
                 <Twitter className="h-4 w-4" />
               </a>
               <a 
-                href="#" 
+                href="https://github.com/your-username/artcraft-for-kids" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-artcraft-muted flex items-center justify-center text-artcraft-primary hover:bg-artcraft-accent hover:text-white transition-colors"
                 aria-label="GitHub"
               >
@@ -142,7 +147,7 @@ const Index = () => {
           
           <div className="border-t border-artcraft-muted/30 pt-6 flex flex-col sm:flex-row justify-between items-center">
             <p className="text-sm text-artcraft-secondary mb-4 sm:mb-0">
-              &copy; {new Date().getFullYear()} r/ArtCraft — Made with <Heart className="h-3 w-3 inline text-red-500" /> for Kiddies Worldwide
+              &copy; {new Date().getFullYear()} ArtCraft for Kids — Made with <Heart className="h-3 w-3 inline text-red-500" /> for Children Worldwide
             </p>
             <div className="flex items-center gap-4">
               <a 

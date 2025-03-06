@@ -65,7 +65,6 @@ const UserProfile = () => {
   
   const fetchUserDrawings = async () => {
     try {
-      // Get public drawings for this user
       const { data, error, count } = await supabase
         .from('saved_drawings')
         .select('*', { count: 'exact' })
