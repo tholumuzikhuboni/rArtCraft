@@ -2,7 +2,7 @@
 import * as React from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, PanInfo } from "framer-motion";
 
 interface MovableDialogProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
@@ -33,7 +33,8 @@ export const MovableDialog = ({
         "flex flex-col w-full max-w-md",
         className
       )}
-      {...props}
+      // Remove any onDrag from props to avoid type conflicts
+      {...Object.fromEntries(Object.entries(props).filter(([key]) => key !== 'onDrag'))}
     >
       <div 
         className="flex items-center justify-between p-4 border-b border-artcraft-muted/10 cursor-move"
