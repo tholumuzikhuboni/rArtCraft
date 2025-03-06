@@ -13,6 +13,7 @@ type UserBadge = {
   badge_name: string;
   badge_description: string;
   earned_at: string;
+  user_id: string;
 };
 
 interface UserBadgesProps {
@@ -34,7 +35,7 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
     try {
       setLoading(true);
       
-      // Fix: Use a direct query to the user_badges table rather than the RPC
+      // Use a direct query to the user_badges table
       const { data, error } = await supabase
         .from('user_badges')
         .select('*')
@@ -45,7 +46,8 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
         return;
       }
       
-      let userBadges = data as UserBadge[] || [];
+      // Cast the data to our UserBadge type
+      let userBadges = (data as unknown as UserBadge[]) || [];
       
       // Add owner badge if this is the owner
       if (isOwner) {
@@ -54,7 +56,8 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
           badge_type: 'owner',
           badge_name: 'App Owner',
           badge_description: 'Creator and owner of ArtCraft',
-          earned_at: new Date().toISOString()
+          earned_at: new Date().toISOString(),
+          user_id: userId
         };
         
         // Check if the owner badge is already in the data
