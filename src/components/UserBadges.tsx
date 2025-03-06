@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Trophy, Medal, Star, BadgeCheck } from 'lucide-react';
+import { Trophy, Medal, Star, BadgeCheck, Crown, Shield } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -22,6 +22,7 @@ interface UserBadgesProps {
 export const UserBadges = ({ userId }: UserBadgesProps) => {
   const [badges, setBadges] = useState<UserBadge[]>([]);
   const [loading, setLoading] = useState(true);
+  const isOwner = userId === 'c8bd2f31-fffd-43a3-98b4-2e89c27ca34f';
 
   useEffect(() => {
     if (userId) {
@@ -42,11 +43,27 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
         return;
       }
       
-      if (data) {
-        setBadges(data as UserBadge[]);
-      } else {
-        setBadges([]);
+      let userBadges = data as UserBadge[] || [];
+      
+      // Add owner badge if this is the owner
+      if (isOwner) {
+        const ownerBadge: UserBadge = {
+          id: 'owner-badge',
+          badge_type: 'owner',
+          badge_name: 'App Owner',
+          badge_description: 'Creator and owner of ArtCraft',
+          earned_at: new Date().toISOString()
+        };
+        
+        // Check if the owner badge is already in the data
+        const hasOwnerBadge = userBadges.some(badge => badge.badge_type === 'owner');
+        
+        if (!hasOwnerBadge) {
+          userBadges = [ownerBadge, ...userBadges];
+        }
       }
+      
+      setBadges(userBadges);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -56,6 +73,10 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
 
   const getBadgeIcon = (badgeType: string) => {
     switch (badgeType) {
+      case 'owner':
+        return <Crown className="h-5 w-5 text-amber-500" />;
+      case 'admin':
+        return <Shield className="h-5 w-5 text-purple-500" />;
       case 'weekly_champion':
         return <Trophy className="h-5 w-5 text-yellow-500" />;
       case 'weekly_silver':
@@ -69,6 +90,10 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
 
   const getBadgeColor = (badgeType: string) => {
     switch (badgeType) {
+      case 'owner':
+        return "bg-amber-100 text-amber-800 border-amber-200";
+      case 'admin':
+        return "bg-purple-100 text-purple-800 border-purple-200";
       case 'weekly_champion':
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case 'weekly_silver':

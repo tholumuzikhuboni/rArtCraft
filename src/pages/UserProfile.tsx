@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserBadges } from '@/components/UserBadges';
+import { MovableDialog } from '@/components/MovableDialog';
 
 type Profile = {
   id: string;
@@ -34,6 +35,8 @@ const UserProfile = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
   const [drawingCount, setDrawingCount] = useState(0);
+  const [selectedDrawing, setSelectedDrawing] = useState<Drawing | null>(null);
+  const [dialogPosition, setDialogPosition] = useState({ x: 20, y: 80 });
   
   useEffect(() => {
     if (userId) {
@@ -96,6 +99,14 @@ const UserProfile = () => {
   
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+  
+  const handleDrawingClick = (drawing: Drawing) => {
+    setSelectedDrawing(drawing);
+  };
+  
+  const closeDrawingDialog = () => {
+    setSelectedDrawing(null);
   };
   
   if (loading) {
@@ -211,7 +222,11 @@ const UserProfile = () => {
           {drawings.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {drawings.map((drawing) => (
-                <div key={drawing.id} className="group relative bg-white rounded-lg overflow-hidden shadow-sm border border-artcraft-muted/20 aspect-square hover:shadow-md transition-shadow">
+                <div 
+                  key={drawing.id} 
+                  className="group relative bg-white rounded-lg overflow-hidden shadow-sm border border-artcraft-muted/20 aspect-square hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => handleDrawingClick(drawing)}
+                >
                   {drawing.image_data ? (
                     <img 
                       src={drawing.image_data} 
@@ -246,10 +261,66 @@ const UserProfile = () => {
         </div>
       </main>
       
+      {selectedDrawing && (
+        <MovableDialog
+          title={selectedDrawing.title}
+          isOpen={!!selectedDrawing}
+          onClose={closeDrawingDialog}
+          initialPosition={dialogPosition}
+          className="max-w-lg"
+        >
+          <div className="space-y-4">
+            {selectedDrawing.image_data && (
+              <div className="rounded-md overflow-hidden border border-artcraft-muted/20">
+                <img 
+                  src={selectedDrawing.image_data} 
+                  alt={selectedDrawing.title}
+                  className="w-full object-contain" 
+                />
+              </div>
+            )}
+            <div>
+              <h4 className="font-medium text-artcraft-primary">{selectedDrawing.title}</h4>
+              <p className="text-sm text-artcraft-secondary">
+                Created on {new Date(selectedDrawing.created_at).toLocaleDateString()}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (navigator.share) {
+                    navigator.share({
+                      title: `ArtCraft: ${selectedDrawing.title}`,
+                      text: `Check out this amazing artwork: ${selectedDrawing.title}`,
+                      url: window.location.href
+                    });
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    alert('Link copied to clipboard!');
+                  }
+                }}
+              >
+                Share
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={closeDrawingDialog}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </MovableDialog>
+      )}
+      
       <footer className="border-t border-artcraft-muted/50 py-6 bg-white/50">
         <div className="container text-center">
           <p className="text-sm text-artcraft-secondary">
-            &copy; {new Date().getFullYear()} r/ArtCraft — All rights reserved
+            &copy; {new Date().getFullYear()} ArtCraft for Kids — All rights reserved
           </p>
         </div>
       </footer>
