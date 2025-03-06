@@ -34,9 +34,11 @@ export const UserBadges = ({ userId }: UserBadgesProps) => {
     try {
       setLoading(true);
       
-      // Use the stored function instead of direct table access
+      // Fix: Use a direct query to the user_badges table rather than the RPC
       const { data, error } = await supabase
-        .rpc('get_user_badges', { user_id_param: userId });
+        .from('user_badges')
+        .select('*')
+        .eq('user_id', userId);
         
       if (error) {
         console.error('Error fetching badges:', error);
