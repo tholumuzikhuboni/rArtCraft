@@ -1,6 +1,6 @@
 # ArtCraft for Kids
 
-Welcome! This project was built by [Tholumuzi] (https://portfolio.tholumuzi.co.za). Using Lovable.dev
+Welcome! This project was built by [Tholumuzi](https://portfolio.tholumuzi.co.za). Using Lovable.dev
 
 ## Getting Started
 
