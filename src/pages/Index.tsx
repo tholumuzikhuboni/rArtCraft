@@ -149,26 +149,6 @@ const Index = () => {
             <p className="text-sm text-artcraft-secondary mb-4 sm:mb-0">
               &copy; {new Date().getFullYear()} ArtCraft for Kids — Made with <Heart className="h-3 w-3 inline text-red-500" /> for Children Worldwide
             </p>
-            <div className="flex items-center gap-4">
-              <a 
-                href="#" 
-                className="text-sm text-artcraft-secondary hover:text-artcraft-accent transition-colors"
-              >
-                Terms
-              </a>
-              <a 
-                href="#" 
-                className="text-sm text-artcraft-secondary hover:text-artcraft-accent transition-colors"
-              >
-                Privacy
-              </a>
-              <a 
-                href="#" 
-                className="text-sm text-artcraft-secondary hover:text-artcraft-accent transition-colors"
-              >
-                Help
-              </a>
-            </div>
           </div>
         </div>
       </footer>
